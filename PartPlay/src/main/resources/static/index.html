@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>PartPlay — Home</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+    <style>
+        :root {
+          --bg: #0d0d0d;
+          --surface: #161616;
+          --border: #2a2a2a;
+          --accent: #c8f135;
+          --accent-dark: #9bbf1f;
+          --text: #f0f0f0;
+          --muted: #6b6b6b;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+          background: var(--bg);
+          color: var(--text);
+          font-family: 'DM Sans', sans-serif;
+          min-height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow-x: hidden;
+        }
+
+        body::before {
+          content: '';
+          position: fixed;
+          inset: 0;
+          background-image:
+            linear-gradient(var(--border) 1px, transparent 1px),
+            linear-gradient(90deg, var(--border) 1px, transparent 1px);
+          background-size: 48px 48px;
+          opacity: 0.35;
+          z-index: 0;
+        }
+
+        body::after {
+          content: '';
+          position: fixed;
+          top: -20%;
+          right: -10%;
+          width: 600px;
+          height: 600px;
+          background: radial-gradient(circle, rgba(200,241,53,0.10) 0%, transparent 70%);
+          z-index: 0;
+          animation: blobPulse 6s ease-in-out infinite alternate;
+        }
+
+        @keyframes blobPulse {
+          from { transform: scale(1); }
+          to   { transform: scale(1.15) translate(-30px, 30px); }
+        }
+
+        .home-card {
+          position: relative;
+          z-index: 1;
+          width: min(900px, 92vw);
+          background: var(--surface);
+          border: 1px solid var(--border);
+          padding: 56px;
+          text-align: center;
+          animation: fadeUp .5s ease both;
+        }
+
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(24px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .brand {
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 3.5rem;
+          letter-spacing: 3px;
+          color: var(--accent);
+        }
+
+        .tagline {
+          color: var(--muted);
+          margin-top: 6px;
+          margin-bottom: 44px;
+          font-size: 0.9rem;
+          letter-spacing: 1px;
+        }
+
+        .actions {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 20px;
+        }
+
+        .action-card {
+          border: 1px solid var(--border);
+          background: #1b1b1b;
+          padding: 40px 24px;
+          cursor: pointer;
+          transition: border-color .25s, transform .25s, box-shadow .25s;
+          text-decoration: none;
+          display: block;
+          color: inherit;
+        }
+
+        .action-card:hover {
+          border-color: var(--accent);
+          transform: translateY(-5px);
+          box-shadow: 0 12px 36px rgba(0,0,0,0.5);
+        }
+
+        .action-card .icon {
+          font-size: 2.8rem;
+          margin-bottom: 14px;
+        }
+
+        .action-title {
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 1.6rem;
+          letter-spacing: 1.5px;
+          color: var(--text);
+        }
+
+        .action-desc {
+          margin-top: 6px;
+          font-size: 0.82rem;
+          color: var(--muted);
+        }
+
+        .divider {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          margin: 36px 0;
+          color: var(--muted);
+          font-size: 0.78rem;
+          letter-spacing: 2px;
+          text-transform: uppercase;
+        }
+
+        .divider::before, .divider::after {
+          content: '';
+          flex: 1;
+          height: 1px;
+          background: var(--border);
+        }
+
+        .username-wrap {
+          display: flex;
+          gap: 12px;
+        }
+
+        .username-input {
+          flex: 1;
+          background: #1e1e1e;
+          border: 1px solid var(--border);
+          color: var(--text);
+          font-family: 'DM Sans', sans-serif;
+          font-size: 0.95rem;
+          padding: 13px 16px;
+          outline: none;
+          transition: border-color .2s, box-shadow .2s;
+        }
+
+        .username-input:focus {
+          border-color: var(--accent);
+          box-shadow: 0 0 0 3px rgba(200,241,53,0.1);
+        }
+
+        .username-input::placeholder { color: var(--muted); }
+
+        .go-btn {
+          background: var(--accent);
+          color: #0d0d0d;
+          border: none;
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 1.1rem;
+          letter-spacing: 2px;
+          padding: 13px 28px;
+          cursor: pointer;
+          transition: background .2s;
+          white-space: nowrap;
+        }
+
+        .go-btn:hover { background: var(--accent-dark); }
+
+        .error-hint {
+          margin-top: 8px;
+          font-size: 0.78rem;
+          color: #ff5f5f;
+          text-align: left;
+          display: none;
+        }
+
+        .error-hint.visible { display: block; }
+
+        @media (max-width: 600px) {
+          .home-card { padding: 36px 24px; }
+          .actions { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="home-card">
+
+    <div class="brand">PartPlay</div>
+    <div class="tagline">Find your vibe. Connect instantly.</div>
+
+    <div class="actions">
+        <!-- View Profile — triggers username focus -->
+        <div class="action-card" onclick="focusUsername()">
+            <div class="icon">👤</div>
+            <div class="action-title">View Profile</div>
+            <div class="action-desc">Search any user by their username</div>
+        </div>
+
+        <!-- Register — direct navigation -->
+        <a class="action-card" href="/register.html">
+            <div class="icon">✨</div>
+            <div class="action-title">Create Account</div>
+            <div class="action-desc">Join the PartPlay community</div>
+        </a>
+    </div>
+
+    <div class="divider">or search directly</div>
+
+    <div class="username-wrap">
+        <input
+                id="usernameInput"
+                class="username-input"
+                placeholder="Enter a username to open their profile…"
+        />
+        <button class="go-btn" onclick="goProfile()">GO</button>
+    </div>
+    <div class="error-hint" id="errorHint">Please enter a username first.</div>
+
+</div>
+
+<script>
+    function focusUsername() {
+      const input = document.getElementById('usernameInput');
+      input.focus();
+      input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function goProfile() {
+      const username = document.getElementById('usernameInput').value.trim();
+      const hint = document.getElementById('errorHint');
+
+      if (!username) {
+        hint.classList.add('visible');
+        document.getElementById('usernameInput').focus();
+        return;
+      }
+
+      hint.classList.remove('visible');
+      window.location.href = '/profile.html?username=' + encodeURIComponent(username);
+    }
+
+    document.getElementById('usernameInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') goProfile();
+    });
+
+    document.getElementById('usernameInput').addEventListener('input', () => {
+      document.getElementById('errorHint').classList.remove('visible');
+    });
+</script>
+
+</body>
+</html>

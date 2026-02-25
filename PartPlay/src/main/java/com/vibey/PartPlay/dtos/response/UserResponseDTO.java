@@ -7,6 +7,7 @@ public class UserResponseDTO {
     private String name;
     private Integer age;
     private String email;
+    private String profilePhotoUrl;
 
     // Getters and Setters
 
@@ -48,5 +49,13 @@ public class UserResponseDTO {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getProfilePhotoUrl() {
+        return profilePhotoUrl;
+    }
+
+    public void setProfilePhotoUrl(String profilePhotoUrl) {
+        this.profilePhotoUrl = profilePhotoUrl;
     }
 }

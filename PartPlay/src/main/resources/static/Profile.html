@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>PartPlay — Profile</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+          --bg: #0d0d0d;
+          --surface: #161616;
+          --border: #2a2a2a;
+          --accent: #c8f135;
+          --accent-dark: #9bbf1f;
+          --text: #f0f0f0;
+          --muted: #6b6b6b;
+          --error: #ff5f5f;
+        }
+
+        body {
+          background: var(--bg);
+          color: var(--text);
+          font-family: 'DM Sans', sans-serif;
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          overflow-x: hidden;
+        }
+
+        body::before {
+          content: '';
+          position: fixed;
+          inset: 0;
+          background-image:
+            linear-gradient(var(--border) 1px, transparent 1px),
+            linear-gradient(90deg, var(--border) 1px, transparent 1px);
+          background-size: 48px 48px;
+          opacity: 0.4;
+          z-index: 0;
+        }
+
+        body::after {
+          content: '';
+          position: fixed;
+          bottom: -20%;
+          left: -10%;
+          width: 600px;
+          height: 600px;
+          background: radial-gradient(circle, rgba(200,241,53,0.10) 0%, transparent 70%);
+          z-index: 0;
+          animation: blobPulse 6s ease-in-out infinite alternate;
+        }
+
+        @keyframes blobPulse {
+          from { transform: scale(1) translate(0,0); }
+          to   { transform: scale(1.15) translate(40px, -40px); }
+        }
+
+        /* Nav */
+        .nav {
+          position: relative;
+          z-index: 1;
+          width: min(960px, 95vw);
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin-bottom: 20px;
+          animation: fadeUp 0.4s ease both;
+        }
+
+        .brand-top {
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 1.8rem;
+          color: var(--accent);
+          letter-spacing: 2px;
+          text-decoration: none;
+          white-space: nowrap;
+        }
+
+        .back-btn {
+          background: transparent;
+          border: 1px solid var(--border);
+          color: var(--muted);
+          font-family: 'DM Sans', sans-serif;
+          font-size: 0.82rem;
+          padding: 8px 14px;
+          cursor: pointer;
+          transition: border-color .2s, color .2s;
+          white-space: nowrap;
+        }
+
+        .back-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+        .search-input {
+          flex: 1;
+          background: #1e1e1e;
+          border: 1px solid var(--border);
+          color: var(--text);
+          font-family: 'DM Sans', sans-serif;
+          font-size: 0.95rem;
+          padding: 12px 16px;
+          outline: none;
+          transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .search-input:focus {
+          border-color: var(--accent);
+          box-shadow: 0 0 0 3px rgba(200,241,53,0.1);
+        }
+
+        .search-btn {
+          background: var(--accent);
+          color: #0d0d0d;
+          border: none;
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 1.1rem;
+          letter-spacing: 2px;
+          padding: 12px 28px;
+          cursor: pointer;
+          transition: background 0.2s;
+          white-space: nowrap;
+        }
+
+        .search-btn:hover { background: var(--accent-dark); }
+
+        /* Card */
+        .wrapper {
+          position: relative;
+          z-index: 1;
+          display: grid;
+          grid-template-columns: 1fr 1.6fr;
+          width: min(960px, 95vw);
+          border: 1px solid var(--border);
+          background: var(--surface);
+          overflow: hidden;
+          animation: fadeUp 0.6s ease both;
+          animation-delay: 0.1s;
+          opacity: 0;
+        }
+
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(24px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .panel-left {
+          background: var(--accent);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 52px 36px;
+          position: relative;
+          overflow: hidden;
+          gap: 20px;
+        }
+
+        .panel-left::before {
+          content: '';
+          position: absolute;
+          bottom: -80px; left: -80px;
+          width: 280px; height: 280px;
+          border-radius: 50%;
+          background: rgba(0,0,0,0.07);
+        }
+
+        .panel-left::after {
+          content: '';
+          position: absolute;
+          top: -50px; right: -60px;
+          width: 200px; height: 200px;
+          border-radius: 50%;
+          background: rgba(0,0,0,0.05);
+        }
+
+        .avatar {
+          position: relative;
+          z-index: 1;
+          width: 140px; height: 140px;
+          border-radius: 50%;
+          border: 4px solid #0d0d0d;
+          background: #0d0d0d;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+        }
+
+        .avatar img { width: 100%; height: 100%; object-fit: cover; display: none; }
+        .avatar img.loaded { display: block; }
+
+        .avatar-initials {
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 3rem;
+          color: var(--accent);
+          letter-spacing: 2px;
+        }
+
+        .user-handle {
+          position: relative;
+          z-index: 1;
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 1.6rem;
+          color: #0d0d0d;
+          letter-spacing: 1px;
+          text-align: center;
+        }
+
+        .user-id-badge {
+          position: relative;
+          z-index: 1;
+          background: rgba(0,0,0,0.12);
+          color: #1e1e1e;
+          font-size: 0.72rem;
+          font-weight: 500;
+          letter-spacing: 1.5px;
+          text-transform: uppercase;
+          padding: 4px 12px;
+        }
+
+        .panel-right {
+          padding: 48px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        }
+
+        .section-label {
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 1.8rem;
+          letter-spacing: 1px;
+          color: var(--text);
+          border-bottom: 1px solid var(--border);
+          padding-bottom: 12px;
+          margin-bottom: 28px;
+        }
+
+        .info-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 20px 32px;
+        }
+
+        .info-item .field-label {
+          font-size: 0.72rem;
+          font-weight: 500;
+          letter-spacing: 1.5px;
+          text-transform: uppercase;
+          color: var(--muted);
+          margin-bottom: 4px;
+        }
+
+        .info-item .field-value { font-size: 1rem; color: var(--text); word-break: break-all; }
+        .info-item.full { grid-column: 1 / -1; }
+        .field-value.accent { color: var(--accent); font-weight: 500; }
+
+        /* Skeleton */
+        .skeleton {
+          background: linear-gradient(90deg, #1e1e1e 25%, #2a2a2a 50%, #1e1e1e 75%);
+          background-size: 200% 100%;
+          animation: shimmer 1.4s infinite;
+          border-radius: 2px;
+        }
+
+        @keyframes shimmer {
+          from { background-position: 200% 0; }
+          to   { background-position: -200% 0; }
+        }
+
+        .skeleton-avatar {
+          width: 140px; height: 140px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #1a2a00 25%, #2a3a00 50%, #1a2a00 75%);
+          background-size: 200% 100%;
+          animation: shimmer 1.4s infinite;
+          border: 4px solid #0d0d0d;
+        }
+
+        /* State panels */
+        .state-panel {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 60px 40px;
+          text-align: center;
+          gap: 12px;
+        }
+
+        .state-panel .state-icon { font-size: 3rem; }
+
+        .state-panel h3 {
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 1.6rem;
+          letter-spacing: 1px;
+        }
+
+        .state-panel p { font-size: 0.88rem; color: var(--muted); max-width: 260px; line-height: 1.6; }
+
+        /* Toast */
+        .toast {
+          position: fixed;
+          bottom: 32px;
+          left: 50%;
+          transform: translateX(-50%) translateY(100px);
+          background: var(--error);
+          color: #fff;
+          font-weight: 500;
+          font-size: 0.9rem;
+          padding: 12px 28px;
+          z-index: 999;
+          transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+        }
+
+        .toast.show { transform: translateX(-50%) translateY(0); }
+
+        @media (max-width: 700px) {
+          .wrapper { grid-template-columns: 1fr; }
+          .panel-left { flex-direction: row; gap: 20px; justify-content: flex-start; padding: 28px 24px; }
+          .avatar, .skeleton-avatar { width: 80px; height: 80px; }
+          .avatar-initials { font-size: 2rem; }
+          .panel-right { padding: 28px 24px; }
+          .info-grid { grid-template-columns: 1fr; }
+          .nav { flex-wrap: wrap; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="nav">
+    <a class="brand-top" href="/index.html">PartPlay</a>
+    <button class="back-btn" onclick="window.location.href='/index.html'">← Home</button>
+    <input class="search-input" type="text" id="searchInput" placeholder="Enter a username…"/>
+    <button class="search-btn" onclick="loadProfile()">SEARCH</button>
+</div>
+
+<div class="wrapper" id="card">
+    <div class="panel-left" style="background:#1a1a1a;">
+        <div class="state-panel"><div class="state-icon">👤</div></div>
+    </div>
+    <div class="panel-right">
+        <div class="state-panel">
+            <div class="state-icon">🔍</div>
+            <h3>Search a User</h3>
+            <p>Enter a username above and hit <strong style="color:var(--accent)">Search</strong> to view their profile.</p>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    // ── Auto-load if ?username= is in the URL ──
+    const params = new URLSearchParams(window.location.search);
+    const preloaded = params.get('username');
+    if (preloaded) {
+      document.getElementById('searchInput').value = preloaded;
+      loadProfile();
+    }
+
+    document.getElementById('searchInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') loadProfile();
+    });
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3500);
+    }
+
+    function getInitials(name, username) {
+      const src = name || username || '?';
+      return src.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+    }
+
+    function renderSkeleton() {
+      document.getElementById('card').innerHTML = `
+        <div class="panel-left">
+          <div class="skeleton-avatar"></div>
+          <div class="skeleton" style="width:100px;height:22px;"></div>
+          <div class="skeleton" style="width:70px;height:14px;"></div>
+        </div>
+        <div class="panel-right">
+          <div class="section-label">Profile Details</div>
+          <div class="info-grid">
+            ${Array(5).fill(0).map(() => `
+              <div class="info-item">
+                <div class="field-label"><div class="skeleton" style="width:60px;height:10px;"></div></div>
+                <div class="field-value"><div class="skeleton" style="width:120px;height:16px;margin-top:4px;"></div></div>
+              </div>`).join('')}
+          </div>
+        </div>`;
+    }
+
+    function renderProfile(data) {
+      const { userId, username, name, age, email, profilePhotoUrl } = data;
+      const initials = getInitials(name, username);
+      document.title = `PartPlay — @${username}`;
+
+      document.getElementById('card').innerHTML = `
+        <div class="panel-left">
+          <div class="avatar">
+            ${profilePhotoUrl
+              ? `<img src="${profilePhotoUrl}" alt="Profile"
+                   onload="this.classList.add('loaded')"
+                   onerror="this.style.display='none'; document.getElementById('fb').style.display='flex'"/>`
+              : ''}
+            <div id="fb" style="width:100%;height:100%;display:${profilePhotoUrl ? 'none' : 'flex'};align-items:center;justify-content:center;">
+              <span class="avatar-initials">${initials}</span>
+            </div>
+          </div>
+          <div class="user-handle">@${username}</div>
+          <div class="user-id-badge">ID · ${userId}</div>
+        </div>
+        <div class="panel-right">
+          <div class="section-label">Profile Details</div>
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="field-label">Username</div>
+              <div class="field-value accent">@${username}</div>
+            </div>
+            <div class="info-item">
+              <div class="field-label">Age</div>
+              <div class="field-value">${age ?? '—'}</div>
+            </div>
+            <div class="info-item full">
+              <div class="field-label">Display Name</div>
+              <div class="field-value">${name || '<span style="color:var(--muted);font-style:italic;">Not set</span>'}</div>
+            </div>
+            <div class="info-item full">
+              <div class="field-label">Email</div>
+              <div class="field-value">${email}</div>
+            </div>
+            <div class="info-item full">
+              <div class="field-label">Profile Photo</div>
+              <div class="field-value">
+                ${profilePhotoUrl
+                  ? `<span style="color:var(--accent)">✓ Uploaded</span>`
+                  : `<span style="color:var(--muted);font-style:italic;">No photo uploaded</span>`}
+              </div>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function renderError(msg) {
+      document.getElementById('card').innerHTML = `
+        <div class="panel-left" style="background:#1a1a1a;">
+          <div class="state-panel"><div class="state-icon">😶</div></div>
+        </div>
+        <div class="panel-right">
+          <div class="state-panel">
+            <div class="state-icon">⚠️</div>
+            <h3>Not Found</h3>
+            <p>${msg}</p>
+          </div>
+        </div>`;
+    }
+
+    async function loadProfile() {
+      const username = document.getElementById('searchInput').value.trim();
+      if (!username) { showToast('Please enter a username'); return; }
+
+      // Update URL so the page is bookmarkable / shareable
+      history.pushState({}, '', `/profile.html?username=${encodeURIComponent(username)}`);
+
+      renderSkeleton();
+
+      try {
+        const res = await fetch(`/users/${encodeURIComponent(username)}`);
+        const json = await res.json();
+
+        if (!res.ok || json.error) {
+          renderError(json.message || 'User not found');
+          return;
+        }
+
+        renderProfile(json.data);
+      } catch (err) {
+        renderError('Could not reach the server. Make sure the backend is running.');
+        showToast('Network error');
+      }
+    }
+</script>
+</body>
+</html>
