@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>PartPlay — Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+          --bg: #0d0d0d;
+          --surface: #161616;
+          --border: #2a2a2a;
+          --accent: #c8f135;
+          --accent-dark: #9bbf1f;
+          --text: #f0f0f0;
+          --muted: #6b6b6b;
+          --error: #ff5f5f;
+        }
+
+        body {
+          background: var(--bg);
+          color: var(--text);
+          font-family: 'DM Sans', sans-serif;
+          min-height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+        }
+
+        /* Grid background */
+        body::before {
+          content: '';
+          position: fixed;
+          inset: 0;
+          background-image:
+            linear-gradient(var(--border) 1px, transparent 1px),
+            linear-gradient(90deg, var(--border) 1px, transparent 1px);
+          background-size: 48px 48px;
+          opacity: 0.4;
+          z-index: 0;
+        }
+
+        /* Animated glow — bottom left this time to differ from register */
+        body::after {
+          content: '';
+          position: fixed;
+          bottom: -15%;
+          left: -10%;
+          width: 650px;
+          height: 650px;
+          background: radial-gradient(circle, rgba(200,241,53,0.11) 0%, transparent 70%);
+          z-index: 0;
+          animation: blobPulse 7s ease-in-out infinite alternate;
+        }
+
+        @keyframes blobPulse {
+          from { transform: scale(1) translate(0, 0); }
+          to   { transform: scale(1.2) translate(30px, -30px); }
+        }
+
+        /* ── Layout ────────────────────────────────────────────────────────────── */
+        .wrapper {
+          position: relative;
+          z-index: 1;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          width: min(860px, 95vw);
+          border: 1px solid var(--border);
+          background: var(--surface);
+          overflow: hidden;
+          animation: fadeUp 0.55s ease both;
+        }
+
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(28px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── Left panel ────────────────────────────────────────────────────────── */
+        .panel-left {
+          background: var(--accent);
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          padding: 52px 44px;
+          position: relative;
+          overflow: hidden;
+        }
+
+        /* Decorative circles */
+        .panel-left::before {
+          content: '';
+          position: absolute;
+          top: -60px; right: -60px;
+          width: 220px; height: 220px;
+          border-radius: 50%;
+          background: rgba(0,0,0,0.07);
+        }
+
+        .panel-left::after {
+          content: '';
+          position: absolute;
+          bottom: -90px; left: -70px;
+          width: 300px; height: 300px;
+          border-radius: 50%;
+          background: rgba(0,0,0,0.06);
+        }
+
+        .brand {
+          position: relative;
+          z-index: 1;
+        }
+
+        .brand-name {
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 3rem;
+          color: #0d0d0d;
+          letter-spacing: 2px;
+          line-height: 1;
+        }
+
+        .brand-sub {
+          display: block;
+          font-family: 'DM Sans', sans-serif;
+          font-size: 0.78rem;
+          font-weight: 500;
+          letter-spacing: 4px;
+          text-transform: uppercase;
+          color: #2e2e2e;
+          margin-top: 4px;
+        }
+
+        .panel-copy {
+          position: relative;
+          z-index: 1;
+        }
+
+        .panel-copy h2 {
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 2.6rem;
+          color: #0d0d0d;
+          line-height: 1.05;
+          letter-spacing: 1px;
+        }
+
+        .panel-copy p {
+          margin-top: 10px;
+          color: #2e2e2e;
+          font-size: 0.88rem;
+          line-height: 1.65;
+        }
+
+        .panel-copy .register-nudge {
+          display: inline-block;
+          margin-top: 20px;
+          font-size: 0.82rem;
+          color: #0d0d0d;
+          font-weight: 500;
+          text-decoration: none;
+          border-bottom: 1.5px solid #0d0d0d;
+          padding-bottom: 1px;
+          transition: opacity 0.2s;
+        }
+
+        .panel-copy .register-nudge:hover { opacity: 0.6; }
+
+        /* ── Right panel ───────────────────────────────────────────────────────── */
+        .panel-right {
+          padding: 52px 48px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        }
+
+        .form-header {
+          margin-bottom: 36px;
+        }
+
+        .form-header h1 {
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 2.4rem;
+          letter-spacing: 1px;
+          color: var(--text);
+        }
+
+        .form-header p {
+          color: var(--muted);
+          font-size: 0.86rem;
+          margin-top: 5px;
+        }
+
+        /* Alert banners (error / success from query params) */
+        .alert {
+          padding: 11px 14px;
+          font-size: 0.84rem;
+          margin-bottom: 24px;
+          display: none;
+        }
+
+        .alert.visible { display: block; }
+        .alert.alert-error { background: rgba(255,95,95,0.1); border: 1px solid var(--error); color: var(--error); }
+        .alert.alert-success { background: rgba(200,241,53,0.1); border: 1px solid var(--accent); color: var(--accent); }
+
+        /* Form fields */
+        .form-group {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          margin-bottom: 18px;
+        }
+
+        label {
+          font-size: 0.73rem;
+          font-weight: 500;
+          letter-spacing: 1.5px;
+          text-transform: uppercase;
+          color: var(--muted);
+        }
+
+        .input-wrap {
+          position: relative;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+          width: 100%;
+          background: #1e1e1e;
+          border: 1px solid var(--border);
+          color: var(--text);
+          font-family: 'DM Sans', sans-serif;
+          font-size: 0.95rem;
+          padding: 13px 14px;
+          outline: none;
+          transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input:focus {
+          border-color: var(--accent);
+          box-shadow: 0 0 0 3px rgba(200,241,53,0.1);
+        }
+
+        input.error { border-color: var(--error); }
+
+        /* Password toggle */
+        .toggle-pw {
+          position: absolute;
+          right: 13px;
+          top: 50%;
+          transform: translateY(-50%);
+          background: none;
+          border: none;
+          cursor: pointer;
+          color: var(--muted);
+          font-size: 0.8rem;
+          letter-spacing: 0.5px;
+          font-family: 'DM Sans', sans-serif;
+          padding: 0;
+          transition: color 0.2s;
+          text-transform: uppercase;
+        }
+
+        .toggle-pw:hover { color: var(--accent); }
+
+        input[type="password"] { padding-right: 60px; }
+
+        .field-error {
+          font-size: 0.74rem;
+          color: var(--error);
+          display: none;
+        }
+
+        .field-error.visible { display: block; }
+
+        /* Submit */
+        .btn-login {
+          width: 100%;
+          background: var(--accent);
+          color: #0d0d0d;
+          border: none;
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 1.25rem;
+          letter-spacing: 2.5px;
+          padding: 16px;
+          cursor: pointer;
+          margin-top: 8px;
+          transition: background 0.2s, transform 0.1s;
+        }
+
+        .btn-login:hover { background: var(--accent-dark); }
+        .btn-login:active { transform: scale(0.99); }
+        .btn-login:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+        /* Spinner inside button */
+        .spinner {
+          display: inline-block;
+          width: 15px; height: 15px;
+          border: 2px solid #0d0d0d;
+          border-top-color: transparent;
+          border-radius: 50%;
+          animation: spin 0.65s linear infinite;
+          vertical-align: middle;
+          margin-right: 8px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Bottom register link */
+        .register-link {
+          text-align: center;
+          margin-top: 20px;
+          font-size: 0.83rem;
+          color: var(--muted);
+        }
+
+        .register-link a {
+          color: var(--accent);
+          text-decoration: none;
+          font-weight: 500;
+          border-bottom: 1px solid transparent;
+          transition: border-color 0.2s;
+        }
+
+        .register-link a:hover { border-color: var(--accent); }
+
+        /* Toast */
+        .toast {
+          position: fixed;
+          bottom: 32px;
+          left: 50%;
+          transform: translateX(-50%) translateY(100px);
+          background: var(--error);
+          color: #fff;
+          font-weight: 500;
+          font-size: 0.88rem;
+          padding: 11px 26px;
+          z-index: 999;
+          transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+        }
+
+        .toast.show { transform: translateX(-50%) translateY(0); }
+
+        @media (max-width: 640px) {
+          .wrapper { grid-template-columns: 1fr; }
+          .panel-left { display: none; }
+          .panel-right { padding: 40px 28px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+
+    <!-- Left panel -->
+    <div class="panel-left">
+        <div class="brand">
+            <div class="brand-name">PartPlay</div>
+            <span class="brand-sub">— find your vibe</span>
+        </div>
+        <div class="panel-copy">
+            <h2>Welcome<br/>back.</h2>
+            <p>Your community is<br/>waiting for you.</p>
+            <a href="/register.html" class="register-nudge">New here? Create an account →</a>
+        </div>
+    </div>
+
+    <!-- Right panel -->
+    <div class="panel-right">
+        <div class="form-header">
+            <h1>Sign In</h1>
+            <p>Enter your username and password to continue</p>
+        </div>
+
+        <!-- Error / logout banners (driven by query params from Spring) -->
+        <div class="alert alert-error" id="alertError">
+            Incorrect username or password. Please try again.
+        </div>
+        <div class="alert alert-success" id="alertLogout">
+            You've been logged out successfully.
+        </div>
+
+        <!--
+          Spring Security intercepts POST /login and reads fields named
+          "username" and "password" — these names are required.
+        -->
+        <form id="loginForm" method="POST" action="/login" novalidate>
+
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="your_username" autocomplete="username"/>
+                <span class="field-error" id="usernameErr">Username is required</span>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="input-wrap">
+                    <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password"/>
+                    <button type="button" class="toggle-pw" id="togglePw" onclick="togglePassword()">Show</button>
+                </div>
+                <span class="field-error" id="passwordErr">Password is required</span>
+            </div>
+
+            <button type="submit" class="btn-login" id="submitBtn">SIGN IN</button>
+
+        </form>
+
+        <div class="register-link">
+            Don't have an account? <a href="/register.html">Create one</a>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    // ── Read query params set by Spring Security ──────────────────────────────
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.has('error')) {
+      document.getElementById('alertError').classList.add('visible');
+    }
+
+    if (params.has('logout')) {
+      document.getElementById('alertLogout').classList.add('visible');
+    }
+
+    // ── Password show/hide ────────────────────────────────────────────────────
+    function togglePassword() {
+      const input = document.getElementById('password');
+      const btn   = document.getElementById('togglePw');
+      const isHidden = input.type === 'password';
+      input.type = isHidden ? 'text' : 'password';
+      btn.textContent = isHidden ? 'Hide' : 'Show';
+    }
+
+    // ── Client-side validation before submit ──────────────────────────────────
+    // Spring will do the real auth check, but this prevents empty submits.
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      const username = document.getElementById('username');
+      const password = document.getElementById('password');
+      const usernameErr = document.getElementById('usernameErr');
+      const passwordErr = document.getElementById('passwordErr');
+      let valid = true;
+
+      if (!username.value.trim()) {
+        username.classList.add('error');
+        usernameErr.classList.add('visible');
+        valid = false;
+      } else {
+        username.classList.remove('error');
+        usernameErr.classList.remove('visible');
+      }
+
+      if (!password.value) {
+        password.classList.add('error');
+        passwordErr.classList.add('visible');
+        valid = false;
+      } else {
+        password.classList.remove('error');
+        passwordErr.classList.remove('visible');
+      }
+
+      if (!valid) {
+        e.preventDefault();
+        return;
+      }
+
+      // Show loading state
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>SIGNING IN...';
+    });
+
+    // Clear errors on input
+    ['username', 'password'].forEach(id => {
+      document.getElementById(id).addEventListener('input', () => {
+        document.getElementById(id).classList.remove('error');
+        document.getElementById(id + 'Err').classList.remove('visible');
+      });
+    });
+</script>
+
+</body>
+</html>

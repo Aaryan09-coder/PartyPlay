@@ -29,7 +29,6 @@ public class UserController {
         return userService.createUser(requestDto, file);
     }
 
-
     @GetMapping("users/{username}")
     public ResponseEntity<ApiResponse<UserResponseDTO>> userProfile(@PathVariable String username){
 
