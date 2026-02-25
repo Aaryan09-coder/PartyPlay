@@ -34,7 +34,7 @@ public class UserService {
             // Check if file is there and save it to mongoDB
             if(file != null && !file.isEmpty()){
 
-                if(!file.getContentType().startsWith("/image")){
+                if(!file.getContentType().startsWith("image/")){
                     throw new RuntimeException("Only image files allowed");
                 }
 
@@ -56,4 +56,6 @@ public class UserService {
             throw new RuntimeException(e);
         }
     }
+
+
 }

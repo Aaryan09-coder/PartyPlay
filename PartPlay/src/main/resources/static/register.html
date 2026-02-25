@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>PartPlay — Register</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+          --bg: #0d0d0d;
+          --surface: #161616;
+          --border: #2a2a2a;
+          --accent: #c8f135;
+          --accent-dark: #9bbf1f;
+          --text: #f0f0f0;
+          --muted: #6b6b6b;
+          --error: #ff5f5f;
+        }
+
+        body {
+          background: var(--bg);
+          color: var(--text);
+          font-family: 'DM Sans', sans-serif;
+          min-height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow-x: hidden;
+        }
+
+        /* Animated background grid */
+        body::before {
+          content: '';
+          position: fixed;
+          inset: 0;
+          background-image:
+            linear-gradient(var(--border) 1px, transparent 1px),
+            linear-gradient(90deg, var(--border) 1px, transparent 1px);
+          background-size: 48px 48px;
+          opacity: 0.4;
+          z-index: 0;
+        }
+
+        /* Glow blob */
+        body::after {
+          content: '';
+          position: fixed;
+          top: -20%;
+          right: -10%;
+          width: 600px;
+          height: 600px;
+          background: radial-gradient(circle, rgba(200,241,53,0.12) 0%, transparent 70%);
+          z-index: 0;
+          animation: blobPulse 6s ease-in-out infinite alternate;
+        }
+
+        @keyframes blobPulse {
+          from { transform: scale(1) translate(0,0); }
+          to   { transform: scale(1.15) translate(-40px, 40px); }
+        }
+
+        .wrapper {
+          position: relative;
+          z-index: 1;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          width: min(960px, 95vw);
+          min-height: 600px;
+          border: 1px solid var(--border);
+          background: var(--surface);
+          overflow: hidden;
+          animation: fadeUp 0.6s ease both;
+        }
+
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(24px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Left panel */
+        .panel-left {
+          background: var(--accent);
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          padding: 48px 40px;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .panel-left::before {
+          content: '';
+          position: absolute;
+          bottom: -80px;
+          left: -80px;
+          width: 300px;
+          height: 300px;
+          border-radius: 50%;
+          background: rgba(0,0,0,0.08);
+        }
+
+        .panel-left::after {
+          content: '';
+          position: absolute;
+          top: -40px;
+          right: -60px;
+          width: 200px;
+          height: 200px;
+          border-radius: 50%;
+          background: rgba(0,0,0,0.06);
+        }
+
+        .brand {
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 3rem;
+          color: #0d0d0d;
+          letter-spacing: 2px;
+          line-height: 1;
+        }
+
+        .brand span {
+          display: block;
+          font-size: 1rem;
+          font-family: 'DM Sans', sans-serif;
+          font-weight: 500;
+          letter-spacing: 4px;
+          text-transform: uppercase;
+          color: #2a2a2a;
+        }
+
+        .panel-tagline {
+          position: relative;
+          z-index: 1;
+        }
+
+        .panel-tagline h2 {
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 2.8rem;
+          color: #0d0d0d;
+          line-height: 1.05;
+          letter-spacing: 1px;
+        }
+
+        .panel-tagline p {
+          margin-top: 12px;
+          color: #2e2e2e;
+          font-size: 0.9rem;
+          line-height: 1.6;
+        }
+
+        .avatar-preview-wrap {
+          margin-top: 24px;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .avatar-preview {
+          width: 56px;
+          height: 56px;
+          border-radius: 50%;
+          border: 3px solid #0d0d0d;
+          background: #0d0d0d;
+          object-fit: cover;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+          transition: all 0.3s ease;
+        }
+
+        .avatar-preview svg { opacity: 0.4; }
+
+        .avatar-preview img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: none;
+        }
+
+        .avatar-preview img.active { display: block; }
+
+        .avatar-label {
+          font-size: 0.8rem;
+          color: #2e2e2e;
+          font-weight: 500;
+        }
+
+        /* Right panel — form */
+        .panel-right {
+          padding: 48px 44px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          gap: 0;
+        }
+
+        .form-header {
+          margin-bottom: 32px;
+        }
+
+        .form-header h1 {
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 2.4rem;
+          letter-spacing: 1px;
+          color: var(--text);
+        }
+
+        .form-header p {
+          color: var(--muted);
+          font-size: 0.88rem;
+          margin-top: 4px;
+        }
+
+        .form-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 16px;
+        }
+
+        .form-group {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
+
+        .form-group.full { grid-column: 1 / -1; }
+
+        label {
+          font-size: 0.75rem;
+          font-weight: 500;
+          letter-spacing: 1px;
+          text-transform: uppercase;
+          color: var(--muted);
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="number"] {
+          background: #1e1e1e;
+          border: 1px solid var(--border);
+          color: var(--text);
+          font-family: 'DM Sans', sans-serif;
+          font-size: 0.95rem;
+          padding: 12px 14px;
+          outline: none;
+          transition: border-color 0.2s, box-shadow 0.2s;
+          width: 100%;
+        }
+
+        input:focus {
+          border-color: var(--accent);
+          box-shadow: 0 0 0 3px rgba(200,241,53,0.1);
+        }
+
+        input.error { border-color: var(--error); }
+
+        .error-msg {
+          font-size: 0.75rem;
+          color: var(--error);
+          display: none;
+        }
+
+        .error-msg.visible { display: block; }
+
+        /* File upload */
+        .file-drop {
+          background: #1e1e1e;
+          border: 1px dashed var(--border);
+          padding: 20px;
+          text-align: center;
+          cursor: pointer;
+          transition: border-color 0.2s, background 0.2s;
+          position: relative;
+        }
+
+        .file-drop:hover, .file-drop.dragover {
+          border-color: var(--accent);
+          background: rgba(200,241,53,0.04);
+        }
+
+        .file-drop input[type="file"] {
+          position: absolute;
+          inset: 0;
+          opacity: 0;
+          cursor: pointer;
+          width: 100%;
+          height: 100%;
+        }
+
+        .file-drop-text {
+          font-size: 0.82rem;
+          color: var(--muted);
+          pointer-events: none;
+        }
+
+        .file-drop-text strong {
+          color: var(--accent);
+        }
+
+        .file-name {
+          font-size: 0.78rem;
+          color: var(--accent);
+          margin-top: 6px;
+          display: none;
+        }
+
+        .file-name.visible { display: block; }
+
+        /* Submit button */
+        .btn-submit {
+          margin-top: 24px;
+          background: var(--accent);
+          color: #0d0d0d;
+          border: none;
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 1.2rem;
+          letter-spacing: 2px;
+          padding: 16px;
+          cursor: pointer;
+          transition: background 0.2s, transform 0.1s;
+          width: 100%;
+        }
+
+        .btn-submit:hover { background: var(--accent-dark); }
+        .btn-submit:active { transform: scale(0.99); }
+        .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Toast */
+        .toast {
+          position: fixed;
+          bottom: 32px;
+          left: 50%;
+          transform: translateX(-50%) translateY(100px);
+          background: var(--accent);
+          color: #0d0d0d;
+          font-weight: 500;
+          font-size: 0.9rem;
+          padding: 12px 28px;
+          z-index: 999;
+          transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+        }
+
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        .toast.error-toast { background: var(--error); color: #fff; }
+
+        /* Spinner */
+        .spinner {
+          display: inline-block;
+          width: 16px;
+          height: 16px;
+          border: 2px solid #0d0d0d;
+          border-top-color: transparent;
+          border-radius: 50%;
+          animation: spin 0.7s linear infinite;
+          vertical-align: middle;
+          margin-right: 6px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @media (max-width: 700px) {
+          .wrapper { grid-template-columns: 1fr; }
+          .panel-left { display: none; }
+          .panel-right { padding: 36px 24px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <!-- Left Panel -->
+    <div class="panel-left">
+        <div>
+            <div class="brand">PartPlay<span>— find your vibe</span></div>
+        </div>
+        <div class="panel-tagline">
+            <h2>Join the<br/>community.</h2>
+            <p>Connect, create, and collaborate<br/>with players who share your frequency.</p>
+            <div class="avatar-preview-wrap">
+                <div class="avatar-preview" id="avatarPreview">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0d0d0d" stroke-width="2">
+                        <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+                    </svg>
+                    <img id="avatarImg" alt="Preview"/>
+                </div>
+                <div class="avatar-label">Your profile photo<br/>will appear here</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Panel — Form -->
+    <div class="panel-right">
+        <div class="form-header">
+            <h1>Create Account</h1>
+            <p>All fields marked * are required</p>
+        </div>
+
+        <form id="registerForm" novalidate>
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label for="username">Username *</label>
+                    <input type="text" id="username" placeholder="vibey_user" maxlength="50"/>
+                    <span class="error-msg" id="usernameErr">Username is required (max 50 chars)</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="age">Age *</label>
+                    <input type="number" id="age" placeholder="18" min="1"/>
+                    <span class="error-msg" id="ageErr">Age must be at least 1</span>
+                </div>
+
+                <div class="form-group full">
+                    <label for="email">Email *</label>
+                    <input type="email" id="email" placeholder="you@example.com"/>
+                    <span class="error-msg" id="emailErr">Enter a valid email</span>
+                </div>
+
+                <div class="form-group full">
+                    <label for="name">Display Name</label>
+                    <input type="text" id="name" placeholder="Optional — leave blank for auto"/>
+                </div>
+
+                <div class="form-group full">
+                    <label for="password">Password *</label>
+                    <input type="password" id="password" placeholder="••••••••"/>
+                    <span class="error-msg" id="passwordErr">Password is required</span>
+                </div>
+
+                <div class="form-group full">
+                    <label>Profile Photo (optional)</label>
+                    <div class="file-drop" id="fileDrop">
+                        <input type="file" id="photoFile" accept="image/*"/>
+                        <div class="file-drop-text">
+                            <strong>Click or drag</strong> an image here
+                        </div>
+                        <div class="file-name" id="fileName"></div>
+                    </div>
+                </div>
+
+            </div>
+
+            <button type="submit" class="btn-submit" id="submitBtn">CREATE ACCOUNT</button>
+        </form>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    const API_BASE = 'http://localhost:8080'; // ← Change this to your backend URL
+
+    // File drop interaction
+    const fileDrop = document.getElementById('fileDrop');
+    const photoFile = document.getElementById('photoFile');
+    const fileName = document.getElementById('fileName');
+    const avatarImg = document.getElementById('avatarImg');
+
+    photoFile.addEventListener('change', () => {
+      const f = photoFile.files[0];
+      if (f) {
+        fileName.textContent = f.name;
+        fileName.classList.add('visible');
+        const url = URL.createObjectURL(f);
+        avatarImg.src = url;
+        avatarImg.classList.add('active');
+      }
+    });
+
+    ['dragover', 'dragleave', 'drop'].forEach(evt => {
+      fileDrop.addEventListener(evt, e => {
+        e.preventDefault();
+        fileDrop.classList.toggle('dragover', evt === 'dragover');
+        if (evt === 'drop') {
+          photoFile.files = e.dataTransfer.files;
+          photoFile.dispatchEvent(new Event('change'));
+        }
+      });
+    });
+
+    // Toast helper
+    function showToast(msg, isError = false) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast' + (isError ? ' error-toast' : '');
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    // Validation
+    function validate() {
+      let valid = true;
+
+      const fields = [
+        { id: 'username', errId: 'usernameErr', test: v => v.trim().length > 0 && v.length <= 50 },
+        { id: 'email',    errId: 'emailErr',    test: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) },
+        { id: 'password', errId: 'passwordErr', test: v => v.trim().length > 0 },
+        { id: 'age',      errId: 'ageErr',      test: v => parseInt(v) >= 1 },
+      ];
+
+      fields.forEach(({ id, errId, test }) => {
+        const input = document.getElementById(id);
+        const err = document.getElementById(errId);
+        if (!test(input.value)) {
+          input.classList.add('error');
+          err.classList.add('visible');
+          valid = false;
+        } else {
+          input.classList.remove('error');
+          err.classList.remove('visible');
+        }
+      });
+
+      return valid;
+    }
+
+    // Form submit
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!validate()) return;
+
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>CREATING...';
+
+      const userPayload = {
+        username: document.getElementById('username').value.trim(),
+        password: document.getElementById('password').value,
+        name: document.getElementById('name').value.trim() || null,
+        age: parseInt(document.getElementById('age').value),
+        email: document.getElementById('email').value.trim(),
+      };
+
+      const formData = new FormData();
+      // Spring expects 'user' part as JSON with correct content type
+      formData.append('user', new Blob([JSON.stringify(userPayload)], { type: 'application/json' }));
+
+      const file = photoFile.files[0];
+      if (file) {
+        formData.append('file', file);
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/register`, {
+          method: 'POST',
+          body: formData,
+          // Do NOT set Content-Type header — browser sets it with boundary automatically
+        });
+
+        if (res.ok) {
+          const text = await res.text();
+          showToast('🎉 ' + text);
+          document.getElementById('registerForm').reset();
+          fileName.classList.remove('visible');
+          avatarImg.classList.remove('active');
+        } else {
+          const errText = await res.text();
+          showToast(errText || 'Registration failed', true);
+        }
+      } catch (err) {
+        showToast('Could not reach server. Is it running?', true);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'CREATE ACCOUNT';
+      }
+    });
+</script>
+</body>
+</html>
