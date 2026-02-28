@@ -348,6 +348,7 @@
           .panel-right { padding: 40px 28px; }
         }
     </style>
+    <script src="/js/csrf.js"></script>
 </head>
 <body>
 
@@ -386,6 +387,7 @@
           "username" and "password" — these names are required.
         -->
         <form id="loginForm" method="POST" action="/login" novalidate>
+            <!-- CSRF token injected by JS below -->
 
             <div class="form-group">
                 <label for="username">Username</label>
@@ -437,6 +439,27 @@
 
     // ── Client-side validation before submit ──────────────────────────────────
     // Spring will do the real auth check, but this prevents empty submits.
+    // Inject CSRF token into the form as a hidden field.
+    // Spring Security requires the token on any form POST.
+    // We read it from the XSRF-TOKEN cookie that Spring sets
+    // when the login page is first loaded.
+    function injectCsrfToken() {
+      const token = getCsrfToken(); // from csrf.js
+      if (!token) return;
+      let input = document.getElementById('_csrf_token');
+      if (!input) {
+        input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = '_csrf';
+        input.id = '_csrf_token';
+        document.getElementById('loginForm').appendChild(input);
+      }
+      input.value = token;
+    }
+
+    // Inject on page load and again just before submit (token may rotate)
+    injectCsrfToken();
+
     document.getElementById('loginForm').addEventListener('submit', function(e) {
       const username = document.getElementById('username');
       const password = document.getElementById('password');
@@ -466,6 +489,9 @@
         e.preventDefault();
         return;
       }
+
+      // Re-inject token right before submit in case it rotated
+      injectCsrfToken();
 
       // Show loading state
       const btn = document.getElementById('submitBtn');

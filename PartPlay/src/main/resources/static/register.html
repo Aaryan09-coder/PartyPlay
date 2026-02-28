@@ -368,6 +368,7 @@
           .panel-right { padding: 36px 24px; }
         }
     </style>
+    <script src="/js/csrf.js"></script>
 </head>
 <body>
 
@@ -545,7 +546,7 @@
       }
 
       try {
-        const res = await fetch(`${API_BASE}/register`, {
+        const res = await csrfFetch('/register', {
           method: 'POST',
           body: formData,
           // Do NOT set Content-Type header — browser sets it with boundary automatically

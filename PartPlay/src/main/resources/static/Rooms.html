@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>PartPlay — Rooms</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+          --bg: #0d0d0d;
+          --surface: #161616;
+          --surface2: #1b1b1b;
+          --border: #2a2a2a;
+          --accent: #c8f135;
+          --accent-dark: #9bbf1f;
+          --accent-dim: rgba(200,241,53,0.08);
+          --text: #f0f0f0;
+          --muted: #6b6b6b;
+          --error: #ff5f5f;
+          --success: #c8f135;
+        }
+
+        body {
+          background: var(--bg);
+          color: var(--text);
+          font-family: 'DM Sans', sans-serif;
+          min-height: 100vh;
+          overflow-x: hidden;
+        }
+
+        body::before {
+          content: '';
+          position: fixed;
+          inset: 0;
+          background-image:
+            linear-gradient(var(--border) 1px, transparent 1px),
+            linear-gradient(90deg, var(--border) 1px, transparent 1px);
+          background-size: 48px 48px;
+          opacity: 0.35;
+          z-index: 0;
+          pointer-events: none;
+        }
+
+        body::after {
+          content: '';
+          position: fixed;
+          top: -20%;
+          right: -15%;
+          width: 700px;
+          height: 700px;
+          background: radial-gradient(circle, rgba(200,241,53,0.08) 0%, transparent 65%);
+          z-index: 0;
+          pointer-events: none;
+          animation: blobPulse 8s ease-in-out infinite alternate;
+        }
+
+        @keyframes blobPulse {
+          from { transform: scale(1); }
+          to   { transform: scale(1.2) translate(-20px, 20px); }
+        }
+
+        /* ── Nav ─────────────────────────────────────────────────────────────────── */
+        .nav {
+          position: relative;
+          z-index: 10;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 20px 40px;
+          border-bottom: 1px solid var(--border);
+          background: rgba(13,13,13,0.85);
+          backdrop-filter: blur(8px);
+        }
+
+        .brand {
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 1.8rem;
+          color: var(--accent);
+          letter-spacing: 2px;
+          text-decoration: none;
+        }
+
+        .nav-links {
+          display: flex;
+          gap: 8px;
+        }
+
+        .nav-btn {
+          background: transparent;
+          border: 1px solid var(--border);
+          color: var(--muted);
+          font-family: 'DM Sans', sans-serif;
+          font-size: 0.82rem;
+          padding: 8px 16px;
+          cursor: pointer;
+          text-decoration: none;
+          transition: border-color .2s, color .2s;
+          display: inline-block;
+        }
+
+        .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* ── Page layout ─────────────────────────────────────────────────────────── */
+        .page {
+          position: relative;
+          z-index: 1;
+          max-width: 1000px;
+          margin: 0 auto;
+          padding: 48px 40px 80px;
+        }
+
+        .page-header {
+          margin-bottom: 48px;
+          animation: fadeUp .5s ease both;
+        }
+
+        .page-header h1 {
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 3.5rem;
+          letter-spacing: 2px;
+          color: var(--text);
+          line-height: 1;
+        }
+
+        .page-header h1 span { color: var(--accent); }
+
+        .page-header p {
+          color: var(--muted);
+          margin-top: 8px;
+          font-size: 0.9rem;
+        }
+
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── Section layout ──────────────────────────────────────────────────────── */
+        .sections {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 24px;
+        }
+
+        .section {
+          background: var(--surface);
+          border: 1px solid var(--border);
+          padding: 32px;
+          animation: fadeUp .5s ease both;
+        }
+
+        .section:nth-child(1) { animation-delay: .05s; }
+        .section:nth-child(2) { animation-delay: .10s; }
+        .section:nth-child(3) { animation-delay: .15s; grid-column: 1 / -1; }
+
+        .section-title {
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 1.4rem;
+          letter-spacing: 1px;
+          color: var(--text);
+          margin-bottom: 6px;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .section-title .badge {
+          font-family: 'DM Sans', sans-serif;
+          font-size: 0.65rem;
+          font-weight: 500;
+          letter-spacing: 1.5px;
+          text-transform: uppercase;
+          background: var(--accent-dim);
+          color: var(--accent);
+          border: 1px solid rgba(200,241,53,0.25);
+          padding: 2px 8px;
+        }
+
+        .section-desc {
+          color: var(--muted);
+          font-size: 0.84rem;
+          margin-bottom: 24px;
+          line-height: 1.55;
+        }
+
+        /* ── Form elements ───────────────────────────────────────────────────────── */
+        .form-group {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          margin-bottom: 16px;
+        }
+
+        label {
+          font-size: 0.72rem;
+          font-weight: 500;
+          letter-spacing: 1.5px;
+          text-transform: uppercase;
+          color: var(--muted);
+        }
+
+        input[type="text"] {
+          background: #1e1e1e;
+          border: 1px solid var(--border);
+          color: var(--text);
+          font-family: 'DM Sans', sans-serif;
+          font-size: 0.95rem;
+          padding: 12px 14px;
+          outline: none;
+          width: 100%;
+          transition: border-color .2s, box-shadow .2s;
+        }
+
+        input[type="text"]:focus {
+          border-color: var(--accent);
+          box-shadow: 0 0 0 3px rgba(200,241,53,0.1);
+        }
+
+        .input-row {
+          display: flex;
+          gap: 10px;
+        }
+
+        .input-row input { flex: 1; }
+
+        /* ── Buttons ─────────────────────────────────────────────────────────────── */
+        .btn {
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 1.1rem;
+          letter-spacing: 2px;
+          padding: 13px 24px;
+          border: none;
+          cursor: pointer;
+          transition: background .2s, transform .1s;
+          white-space: nowrap;
+        }
+
+        .btn:active { transform: scale(0.99); }
+        .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+        .btn-primary { background: var(--accent); color: #0d0d0d; width: 100%; }
+        .btn-primary:hover:not(:disabled) { background: var(--accent-dark); }
+
+        .btn-outline {
+          background: transparent;
+          color: var(--accent);
+          border: 1px solid var(--accent);
+          padding: 11px 20px;
+        }
+
+        .btn-outline:hover:not(:disabled) { background: var(--accent-dim); }
+
+        /* ── Result box — shows room code after creation ─────────────────────────── */
+        .result-box {
+          margin-top: 20px;
+          background: var(--accent-dim);
+          border: 1px solid rgba(200,241,53,0.3);
+          padding: 20px;
+          display: none;
+          animation: fadeUp .3s ease both;
+        }
+
+        .result-box.visible { display: block; }
+
+        .result-label {
+          font-size: 0.7rem;
+          font-weight: 500;
+          letter-spacing: 2px;
+          text-transform: uppercase;
+          color: var(--accent);
+          margin-bottom: 8px;
+        }
+
+        .room-code-display {
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 3rem;
+          letter-spacing: 8px;
+          color: var(--text);
+          line-height: 1;
+        }
+
+        .copy-row {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin-top: 14px;
+          flex-wrap: wrap;
+        }
+
+        .link-display {
+          flex: 1;
+          background: #1e1e1e;
+          border: 1px solid var(--border);
+          color: var(--muted);
+          font-size: 0.78rem;
+          padding: 8px 12px;
+          font-family: monospace;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          min-width: 0;
+        }
+
+        .btn-copy {
+          font-family: 'DM Sans', sans-serif;
+          font-size: 0.78rem;
+          font-weight: 500;
+          letter-spacing: 0.5px;
+          background: transparent;
+          border: 1px solid var(--border);
+          color: var(--muted);
+          padding: 8px 14px;
+          cursor: pointer;
+          transition: border-color .2s, color .2s;
+          white-space: nowrap;
+        }
+
+        .btn-copy:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* ── Invite section ──────────────────────────────────────────────────────── */
+        .invite-section {
+          margin-top: 20px;
+          padding-top: 20px;
+          border-top: 1px solid var(--border);
+          display: none;
+        }
+
+        .invite-section.visible { display: block; }
+
+        .invite-section-title {
+          font-size: 0.72rem;
+          font-weight: 500;
+          letter-spacing: 1.5px;
+          text-transform: uppercase;
+          color: var(--muted);
+          margin-bottom: 10px;
+        }
+
+        /* ── Status messages ─────────────────────────────────────────────────────── */
+        .status-msg {
+          margin-top: 14px;
+          padding: 10px 14px;
+          font-size: 0.84rem;
+          display: none;
+          border-left: 3px solid;
+        }
+
+        .status-msg.visible { display: block; }
+        .status-msg.success { border-color: var(--success); color: var(--success); background: rgba(200,241,53,0.06); }
+        .status-msg.error   { border-color: var(--error);   color: var(--error);   background: rgba(255,95,95,0.06); }
+
+        /* ── Spinner ─────────────────────────────────────────────────────────────── */
+        .spinner {
+          display: inline-block;
+          width: 14px; height: 14px;
+          border: 2px solid currentColor;
+          border-top-color: transparent;
+          border-radius: 50%;
+          animation: spin .65s linear infinite;
+          vertical-align: middle;
+          margin-right: 6px;
+          opacity: 0.7;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── Auto-join banner (shown when ?code= is in URL) ──────────────────────── */
+        .autojoin-banner {
+          position: relative;
+          z-index: 1;
+          background: var(--accent);
+          color: #0d0d0d;
+          padding: 14px 40px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 16px;
+          animation: fadeUp .4s ease both;
+          display: none;
+        }
+
+        .autojoin-banner.visible { display: flex; }
+
+        .autojoin-banner strong {
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 1.2rem;
+          letter-spacing: 1px;
+        }
+
+        .autojoin-banner p { font-size: 0.84rem; }
+
+        .autojoin-banner .btn-join-now {
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 1rem;
+          letter-spacing: 1.5px;
+          background: #0d0d0d;
+          color: var(--accent);
+          border: none;
+          padding: 10px 24px;
+          cursor: pointer;
+          white-space: nowrap;
+          transition: opacity .2s;
+        }
+
+        .autojoin-banner .btn-join-now:hover { opacity: 0.8; }
+
+        /* ── Toast ───────────────────────────────────────────────────────────────── */
+        .toast {
+          position: fixed;
+          bottom: 32px;
+          left: 50%;
+          transform: translateX(-50%) translateY(100px);
+          background: #1e1e1e;
+          border: 1px solid var(--accent);
+          color: var(--accent);
+          font-size: 0.88rem;
+          font-weight: 500;
+          padding: 11px 24px;
+          z-index: 999;
+          transition: transform .4s cubic-bezier(0.34,1.56,0.64,1);
+          white-space: nowrap;
+        }
+
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        .toast.toast-error { border-color: var(--error); color: var(--error); }
+
+        @media (max-width: 720px) {
+          .nav { padding: 16px 20px; }
+          .page { padding: 32px 20px 60px; }
+          .sections { grid-template-columns: 1fr; }
+          .section:nth-child(3) { grid-column: 1; }
+          .page-header h1 { font-size: 2.5rem; }
+        }
+    </style>
+    <script src="/js/csrf.js"></script>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="nav">
+    <a class="brand" href="/index.html">PartPlay</a>
+    <div class="nav-links">
+        <a class="nav-btn" href="/index.html">← Home</a>
+        <a class="nav-btn" href="/profile.html">Profile</a>
+        <button class="nav-btn" onclick="logout()">Logout</button>
+    </div>
+</nav>
+
+<!-- Auto-join banner — shown when user arrives via invite link -->
+<div class="autojoin-banner" id="autojoinBanner">
+    <div>
+        <strong>You've been invited to a room!</strong>
+        <p id="autojoinMsg">Room code: <span id="autojoinCode"></span></p>
+    </div>
+    <button class="btn-join-now" id="autojoinBtn" onclick="autoJoin()">JOIN ROOM</button>
+</div>
+
+<!-- Main content -->
+<div class="page">
+
+    <div class="page-header">
+        <h1>Party<span>Rooms</span></h1>
+        <p>Create a room or join one — your vibe, your crew.</p>
+    </div>
+
+    <div class="sections">
+
+        <!-- ── Create Room ─────────────────────────────────────────────────────── -->
+        <div class="section">
+            <div class="section-title">
+                Create Room
+                <span class="badge">Host</span>
+            </div>
+            <p class="section-desc">Start a new room. You'll get a 6-character code to share with your crew.</p>
+
+            <button class="btn btn-primary" id="createBtn" onclick="createRoom()">CREATE ROOM</button>
+
+            <!-- Result shown after room is created -->
+            <div class="result-box" id="createResult">
+                <div class="result-label">Your Room Code</div>
+                <div class="room-code-display" id="roomCodeDisplay">——</div>
+                <div class="copy-row">
+                    <div class="link-display" id="linkDisplay"></div>
+                    <button class="btn-copy" onclick="copyLink()">Copy Link</button>
+                    <button class="btn-copy" onclick="copyCode()">Copy Code</button>
+                </div>
+
+                <!-- Invite by username — only visible after room is created -->
+                <div class="invite-section" id="inviteSection">
+                    <div class="invite-section-title">Invite a user directly</div>
+                    <div class="input-row">
+                        <input type="text" id="inviteUsername" placeholder="Enter their username…"/>
+                        <button class="btn btn-outline" onclick="inviteUser()">INVITE</button>
+                    </div>
+                    <div class="status-msg" id="inviteStatus"></div>
+                </div>
+            </div>
+
+            <div class="status-msg" id="createStatus"></div>
+        </div>
+
+        <!-- ── Join by Code ────────────────────────────────────────────────────── -->
+        <div class="section">
+            <div class="section-title">
+                Join Room
+                <span class="badge">Member</span>
+            </div>
+            <p class="section-desc">Got a code from the host? Enter it below to join their room instantly.</p>
+
+            <div class="form-group">
+                <label for="joinCode">Room Code</label>
+                <input
+                        type="text"
+                        id="joinCode"
+                        placeholder="e.g. ABC123"
+                        maxlength="6"
+                        oninput="this.value = this.value.toUpperCase()"
+                />
+            </div>
+
+            <button class="btn btn-primary" id="joinBtn" onclick="joinByCode()">JOIN ROOM</button>
+            <div class="status-msg" id="joinStatus"></div>
+        </div>
+
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    // ── State ──────────────────────────────────────────────────────────────────
+    let currentRoomCode = null;
+
+    // ── On load: check for ?code= in URL (invite link flow) ───────────────────
+    window.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get('code');
+      if (code) {
+        const banner = document.getElementById('autojoinBanner');
+        document.getElementById('autojoinCode').textContent = code.toUpperCase();
+        banner.classList.add('visible');
+        // Pre-fill the join input too in case they dismiss the banner
+        document.getElementById('joinCode').value = code.toUpperCase();
+      }
+    });
+
+    // ── Auto-join via banner ───────────────────────────────────────────────────
+    async function autoJoin() {
+      const code = document.getElementById('autojoinCode').textContent.trim();
+      const btn = document.getElementById('autojoinBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>JOINING...';
+
+      try {
+        const res = await fetch(`/rooms/join/${encodeURIComponent(code)}`, {
+          method: 'GET',
+          credentials: 'include'
+        });
+        const json = await res.json();
+
+        if (res.ok && json.success) {
+          document.getElementById('autojoinBanner').style.background = '#1a2a00';
+          document.getElementById('autojoinBanner').style.color = '#c8f135';
+          document.getElementById('autojoinMsg').textContent = json.message || 'Joined successfully!';
+          btn.style.display = 'none';
+          showToast('Joined room ' + code);
+          // Clear the ?code= param from URL without reload
+          history.replaceState({}, '', '/rooms.html');
+        } else {
+          showToast(json.message || 'Could not join room', true);
+          btn.disabled = false;
+          btn.textContent = 'JOIN ROOM';
+        }
+      } catch (err) {
+        showToast('Network error', true);
+        btn.disabled = false;
+        btn.textContent = 'JOIN ROOM';
+      }
+    }
+
+    // ── Create room ────────────────────────────────────────────────────────────
+    async function createRoom() {
+      const btn = document.getElementById('createBtn');
+      const statusEl = document.getElementById('createStatus');
+      setLoading(btn, 'CREATING...');
+      hideStatus(statusEl);
+
+      try {
+        const res = await csrfFetch('/rooms/create', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        const json = await res.json();
+
+        if (res.ok && json.success) {
+          currentRoomCode = json.data;
+
+          // Show the code
+          document.getElementById('roomCodeDisplay').textContent = currentRoomCode;
+
+          // Build and show the invite link
+          const link = `${window.location.origin}/rooms.html?code=${currentRoomCode}`;
+          document.getElementById('linkDisplay').textContent = link;
+
+          document.getElementById('createResult').classList.add('visible');
+          document.getElementById('inviteSection').classList.add('visible');
+
+          showStatus(statusEl, '✓ Room created successfully', 'success');
+        } else {
+          showStatus(statusEl, json.message || 'Failed to create room', 'error');
+        }
+      } catch (err) {
+        showStatus(statusEl, 'Network error — is the server running?', 'error');
+      } finally {
+        resetBtn(btn, 'CREATE ROOM');
+      }
+    }
+
+    // ── Invite user by username ────────────────────────────────────────────────
+    async function inviteUser() {
+      if (!currentRoomCode) return;
+
+      const usernameInput = document.getElementById('inviteUsername');
+      const statusEl = document.getElementById('inviteStatus');
+      const username = usernameInput.value.trim();
+
+      if (!username) {
+        showStatus(statusEl, 'Enter a username to invite', 'error');
+        return;
+      }
+
+      const btn = document.querySelector('#inviteSection .btn-outline');
+      setLoading(btn, 'INVITING...');
+      hideStatus(statusEl);
+
+      try {
+        const res = await csrfFetch(`/rooms/${encodeURIComponent(currentRoomCode)}/invite/${encodeURIComponent(username)}`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        const json = await res.json();
+
+        if (res.ok && json.success) {
+          showStatus(statusEl, `✓ @${username} has been added to the room`, 'success');
+          usernameInput.value = '';
+        } else {
+          showStatus(statusEl, json.message || 'Could not invite user', 'error');
+        }
+      } catch (err) {
+        showStatus(statusEl, 'Network error', 'error');
+      } finally {
+        resetBtn(btn, 'INVITE');
+      }
+    }
+
+    // ── Join by code ───────────────────────────────────────────────────────────
+    async function joinByCode() {
+      const codeInput = document.getElementById('joinCode');
+      const statusEl = document.getElementById('joinStatus');
+      const code = codeInput.value.trim().toUpperCase();
+
+      if (!code || code.length < 6) {
+        showStatus(statusEl, 'Enter a valid 6-character room code', 'error');
+        return;
+      }
+
+      const btn = document.getElementById('joinBtn');
+      setLoading(btn, 'JOINING...');
+      hideStatus(statusEl);
+
+      try {
+        const res = await csrfFetch(`/rooms/join?roomCode=${encodeURIComponent(code)}`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        const json = await res.json();
+
+        if (res.ok && json.success) {
+          showStatus(statusEl, `✓ ${json.message || 'Joined room ' + code}`, 'success');
+          showToast('Welcome to room ' + code);
+          codeInput.value = '';
+        } else {
+          showStatus(statusEl, json.message || 'Could not join room', 'error');
+        }
+      } catch (err) {
+        showStatus(statusEl, 'Network error — is the server running?', 'error');
+      } finally {
+        resetBtn(btn, 'JOIN ROOM');
+      }
+    }
+
+    // ── Clipboard helpers ──────────────────────────────────────────────────────
+    function copyCode() {
+      if (!currentRoomCode) return;
+      navigator.clipboard.writeText(currentRoomCode).then(() => showToast('Code copied!'));
+    }
+
+    function copyLink() {
+      const link = document.getElementById('linkDisplay').textContent;
+      if (!link) return;
+      navigator.clipboard.writeText(link).then(() => showToast('Invite link copied!'));
+    }
+
+    // ── Logout ─────────────────────────────────────────────────────────────────
+    async function logout() {
+      await csrfFetch('/logout', { method: 'POST' });
+      window.location.href = '/login.html?logout=true';
+    }
+
+    // ── UI helpers ─────────────────────────────────────────────────────────────
+    function showStatus(el, msg, type) {
+      el.textContent = msg;
+      el.className = `status-msg visible ${type}`;
+    }
+
+    function hideStatus(el) {
+      el.className = 'status-msg';
+    }
+
+    function setLoading(btn, label) {
+      btn.disabled = true;
+      btn.innerHTML = `<span class="spinner"></span>${label}`;
+    }
+
+    function resetBtn(btn, label) {
+      btn.disabled = false;
+      btn.textContent = label;
+    }
+
+    function showToast(msg, isError = false) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast' + (isError ? ' toast-error' : '');
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    // Allow Enter key on join input
+    document.getElementById('joinCode').addEventListener('keydown', e => {
+      if (e.key === 'Enter') joinByCode();
+    });
+
+    // Allow Enter key on invite input
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('inviteUsername').addEventListener('keydown', e => {
+        if (e.key === 'Enter') inviteUser();
+      });
+    });
+</script>
+
+</body>
+</html>

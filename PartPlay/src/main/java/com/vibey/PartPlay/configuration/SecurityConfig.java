@@ -1,6 +1,8 @@
 package com.vibey.PartPlay.configuration;
 
 import com.vibey.PartPlay.Security.CustomUserDetailsService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,6 +15,12 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
 
 @Configuration
 @EnableWebSecurity
@@ -28,7 +36,6 @@ public class SecurityConfig {
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
-        // Spring Security 6.x: pass UserDetailsService via constructor
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder());
         return provider;
@@ -39,26 +46,66 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 
+    /**
+     * This filter forces Spring to eagerly write the XSRF-TOKEN cookie on
+     * EVERY response — including the initial page load.
+     *
+     * By default, Spring Security 6 uses a "deferred" CSRF token strategy:
+     * the cookie is only written when something in the application actually
+     * reads the token (e.g. a Thymeleaf template rendering a hidden field).
+     * Since our frontend is plain HTML with no server-side rendering, nothing
+     * ever reads the token, so the cookie never gets written, and every
+     * subsequent POST gets a 403.
+     *
+     * This filter reads the token attribute on every request, which triggers
+     * Spring to write the cookie immediately.
+     */
+    @Bean
+    public OncePerRequestFilter csrfCookieFilter() {
+        return new OncePerRequestFilter() {
+            @Override
+            protected void doFilterInternal(HttpServletRequest request,
+                                            HttpServletResponse response,
+                                            jakarta.servlet.FilterChain filterChain)
+                    throws jakarta.servlet.ServletException, IOException {
+                // Reading the attribute is enough to trigger the cookie write
+                CsrfToken csrfToken = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
+                if (csrfToken != null) {
+                    csrfToken.getToken(); // forces the cookie to be written in the response
+                }
+                filterChain.doFilter(request, response);
+            }
+        };
+    }
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 // ── CSRF ──────────────────────────────────────────────────────────
-                // Enabled for all browser requests.
-                // /register and /login are excluded — no session/token exists yet at that point.
+                // CookieCsrfTokenRepository.withHttpOnlyFalse() writes XSRF-TOKEN
+                // as a readable cookie so JavaScript can pick it up.
+                // CsrfTokenRequestAttributeHandler stores the token as a request
+                // attribute so our csrfCookieFilter above can eagerly load it.
                 .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/register", "/login")
+                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                        .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
+                        .ignoringRequestMatchers("/register")
                 )
+
+                // Apply the eager cookie-writing filter after the CSRF filter runs
+                .addFilterAfter(csrfCookieFilter(),
+                        org.springframework.security.web.csrf.CsrfFilter.class)
 
                 // ── Session management ─────────────────────────────────────────────
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                         .sessionFixation().migrateSession()
                         .maximumSessions(1)
+                        .maxSessionsPreventsLogin(false)
                 )
 
                 // ── Route authorization ────────────────────────────────────────────
                 .authorizeHttpRequests(auth -> auth
-                        // Only login + register pages and static assets are public
                         .requestMatchers(
                                 "/login.html",
                                 "/register.html",
@@ -66,9 +113,7 @@ public class SecurityConfig {
                                 "/js/**",
                                 "/images/**"
                         ).permitAll()
-                        // Public API endpoints (registration + login processing)
                         .requestMatchers("/register", "/login").permitAll()
-                        // Everything else — index.html, profile.html, /users/** — requires login
                         .anyRequest().authenticated()
                 )
 
